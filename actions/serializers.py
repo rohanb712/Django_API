@@ -18,6 +18,8 @@ class ActionSerializer(serializers.Serializer):
         return value
     
     def validate_date(self, value):
-        if value > datetime.now().date():
+        from datetime import date
+        today = date.today()
+        if value > today:
             raise serializers.ValidationError("Date cannot be in the future.")
         return value

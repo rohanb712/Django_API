@@ -27,13 +27,13 @@ def action_detail(request, pk):
     action = action_manager.get_by_id(pk)
     
     if not action:
-        return Response({'error': 'Action not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': 'Action not found'}, status=status.HTTP_404_NOT_FOUND)
     
     if request.method == 'GET':
         serializer = ActionSerializer(action)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    elif request.method in ['PUT', 'PATCH']:
+    elif request.method == 'PUT':
         serializer = ActionSerializer(data=request.data)
         if serializer.is_valid():
             action_data = serializer.validated_data
@@ -41,9 +41,23 @@ def action_detail(request, pk):
             if updated_action:
                 response_serializer = ActionSerializer(updated_action)
                 return Response(response_serializer.data, status=status.HTTP_200_OK)
-            return Response({'error': 'Failed to update action'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Failed to update action'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'PATCH':
+        # For PATCH, allow partial updates
+        serializer = ActionSerializer(action, data=request.data, partial=True)
+        if serializer.is_valid():
+            action_data = serializer.validated_data
+            # Merge with existing action data
+            updated_data = {**action, **action_data}
+            updated_action = action_manager.update(pk, updated_data)
+            if updated_action:
+                response_serializer = ActionSerializer(updated_action)
+                return Response(response_serializer.data, status=status.HTTP_200_OK)
+            return Response({'detail': 'Failed to update action'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     elif request.method == 'DELETE':
         action_manager.delete(pk)
-        return Response({'message': 'Action deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)

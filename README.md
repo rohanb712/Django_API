@@ -1,6 +1,6 @@
 # Sustainability Actions Tracker
 
-A full-stack application built with Django REST Framework backend and React frontend to track and manage sustainability actions. Users can create, read, update, and delete sustainability actions with points and dates.
+A full-stack application built with Django REST Framework backend and React frontend to track and manage sustainability actions. Features comprehensive API testing with integrated Postman collections, automated validation, and multi-environment support.
 
 ## Features
 
@@ -23,6 +23,14 @@ A full-stack application built with Django REST Framework backend and React fron
 - **Error Handling**: User-friendly error messages and loading states
 - **Form Validation**: Client-side and server-side validation
 
+### API Testing & Documentation
+- **Automated Postman Integration**: Complete collection with one-command setup
+- **Comprehensive Test Coverage**: Built-in validation for all endpoints and error scenarios
+- **Multi-Environment Support**: Separate configurations for development and production
+- **CLI Testing**: Newman integration for automated testing and CI/CD
+- **Documentation Generation**: Auto-generated HTML API documentation
+- **Error Scenario Testing**: Validation of 404, 400, and edge cases
+
 ## Tech Stack
 
 ### Backend
@@ -36,6 +44,12 @@ A full-stack application built with Django REST Framework backend and React fron
 - Axios for API calls
 - CSS3 for styling
 - Functional components with React Hooks
+
+### API Testing
+- Postman Collections with automated tests
+- Newman CLI for headless testing
+- Environment-specific configurations
+- Comprehensive error scenario coverage
 
 ## Project Structure
 
@@ -60,6 +74,14 @@ Django_API/
 │   │   ├── App.js              # Main App component
 │   │   └── App.css             # Styling
 │   └── ...
+├── postman/                    # Postman integration files
+│   ├── Sustainability_Actions_API.postman_collection.json
+│   ├── Development.postman_environment.json
+│   └── Production.postman_environment.json
+├── scripts/                    # Automation scripts
+│   ├── setup_postman.py       # Full automation script (requires Node.js)
+│   ├── setup_postman.sh       # Shell setup script  
+│   └── validate_postman.py    # Collection validator (no dependencies)
 ├── venv/                       # Python virtual environment
 ├── actions_data.json           # JSON file for data storage
 └── README.md                   # This file
@@ -142,20 +164,77 @@ Django_API/
 
 ### Using Postman
 
-Import the following endpoints into Postman:
+#### Automated Setup (Recommended)
 
-- **GET** `http://localhost:8000/api/actions/`
-- **POST** `http://localhost:8000/api/actions/`
-- **GET** `http://localhost:8000/api/actions/{id}/`
-- **PUT** `http://localhost:8000/api/actions/{id}/`
-- **DELETE** `http://localhost:8000/api/actions/{id}/`
+**Quick Setup:**
+```bash
+# Full automation (requires Node.js)
+bash scripts/setup_postman.sh
 
-For POST/PUT requests, use JSON body:
+# Python script with Node.js detection
+python scripts/setup_postman.py --setup-all
+
+# No Node.js? No problem! Validate collections only
+python scripts/validate_postman.py
+```
+
+**Manual Import:**
+1. **Import Collection:** `postman/Sustainability_Actions_API.postman_collection.json`
+2. **Import Environment:** `postman/Development.postman_environment.json`
+3. **Select Environment:** Choose "Development Environment" in Postman
+4. **Start Django Server:** `python manage.py runserver`
+5. **Run Collection:** Use the collection runner or individual requests
+
+#### Features Included
+
+✅ **Complete API Coverage:** All CRUD endpoints with proper HTTP methods  
+✅ **Automated Tests:** Built-in test scripts for validation and error handling  
+✅ **Environment Variables:** Separate configs for Development and Production  
+✅ **Dynamic Data:** Auto-generated timestamps and IDs  
+✅ **Error Scenarios:** Tests for 404, 400, and validation errors  
+✅ **Documentation:** Self-documenting requests with descriptions  
+
+#### CLI Testing with Newman
+
+```bash
+# Install Newman (if not already installed)
+npm install -g newman
+
+# Run all tests
+newman run postman/Sustainability_Actions_API.postman_collection.json \
+  -e postman/Development.postman_environment.json
+
+# Generate HTML report
+newman run postman/Sustainability_Actions_API.postman_collection.json \
+  -e postman/Development.postman_environment.json \
+  --reporters htmlextra \
+  --reporter-htmlextra-export postman/test-report.html
+```
+
+#### Available Endpoints
+
+- **GET** `{{baseUrl}}/api/actions/` - Get all actions
+- **POST** `{{baseUrl}}/api/actions/` - Create new action  
+- **GET** `{{baseUrl}}/api/actions/{{actionId}}/` - Get specific action
+- **PUT** `{{baseUrl}}/api/actions/{{actionId}}/` - Update action (full)
+- **PATCH** `{{baseUrl}}/api/actions/{{actionId}}/` - Update action (partial)
+- **DELETE** `{{baseUrl}}/api/actions/{{actionId}}/` - Delete action
+
+#### Request Examples
+
+**Create Action:**
 ```json
 {
-  "action": "Action Name",
-  "date": "YYYY-MM-DD",
-  "points": 25
+  "action": "Solar Panel Installation",
+  "date": "{{timestamp}}",
+  "points": 100
+}
+```
+
+**Update Action (PATCH):**
+```json
+{
+  "points": 150
 }
 ```
 
@@ -197,10 +276,38 @@ The API returns appropriate HTTP status codes:
 - Responsive CSS design
 - User experience considerations (loading states, confirmations)
 
+### API Testing & Automation
+- **Postman Collections**: Comprehensive test coverage for all endpoints
+- **Automated Validation**: Built-in tests for response validation and error handling
+- **Environment Management**: Development and production environment configurations
+- **Newman CLI Integration**: Headless testing for CI/CD pipelines
+- **Documentation Generation**: Auto-generated API documentation from collections
+- **Error Scenario Coverage**: Tests for 404, 400, validation errors, and edge cases
+
 ## Testing
 
+### Automated API Testing (Recommended)
+Use the integrated Postman collections for comprehensive testing:
+
+```bash
+# Quick setup and testing
+bash scripts/setup_postman.sh --test
+
+# Run tests with Newman CLI
+newman run postman/Sustainability_Actions_API.postman_collection.json \
+  -e postman/Development.postman_environment.json
+
+# Generate detailed HTML test report
+newman run postman/Sustainability_Actions_API.postman_collection.json \
+  -e postman/Development.postman_environment.json \
+  --reporters htmlextra \
+  --reporter-htmlextra-export postman/test-report.html
+```
+
 ### Backend Testing
-Test the API endpoints using cURL or Postman as shown in the examples above.
+- **Postman Collection**: Import and run the comprehensive collection
+- **Newman CLI**: Automated testing for CI/CD integration
+- **Manual Testing**: Use cURL commands as shown in the API examples above
 
 ### Frontend Testing
 1. Start both backend and frontend servers
@@ -210,6 +317,14 @@ Test the API endpoints using cURL or Postman as shown in the examples above.
    - View actions in the table
    - Edit actions by clicking the Edit button
    - Delete actions by clicking the Delete button
+
+### Test Coverage
+✅ All CRUD operations (Create, Read, Update, Delete)  
+✅ Data validation and error handling  
+✅ Response time and performance testing  
+✅ Error scenarios (404, 400, validation errors)  
+✅ Environment-specific configurations  
+✅ Automated test reporting
 
 ## Production Considerations
 

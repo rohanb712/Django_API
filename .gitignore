@@ -63,3 +63,7 @@ yarn-error.log*
 # Claude AI directory
 .claude/
 
+# Generated documentation
+postman/api-documentation.html
+postman/*-report.html
+
